@@ -1,0 +1,12 @@
+{
+    "name": "eadi/flashairsync",
+    "require": {
+        "php": ">=7.1",
+        "zfcampus/zf-console": "1.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "FlashAirSync\\": "src/FlashAirSync"
+        }
+    }
+}
