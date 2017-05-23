@@ -20,7 +20,7 @@ class Command
         $targetDirectory = $route->getMatchedParam('targetDir');
         $interval = (int)$route->getMatchedParam('interval');
         $this->interrupted = $interval === 0;
-        $localWorkingDir = realpath(__DIR__ . DIRECTORY_SEPARATOR . 'data');
+        $localWorkingDir = realpath(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'data');
 
         $versions = array(1, 2);
         $app = new App($console, $remoteHost, $remoteDir, $localWorkingDir, $targetDirectory);
