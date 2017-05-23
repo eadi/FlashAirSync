@@ -17,20 +17,24 @@ class Command
     {
         $remoteHost = $route->getMatchedParam('remoteHost');
         $remoteDir = $route->getMatchedParam('remoteDir');
-        $localWorkingDir = realpath(getcwd() . DIRECTORY_SEPARATOR . 'data');
-        $targetDirectory = getcwd();
+        $targetDirectory = $route->getMatchedParam('targetDir');
+        $interval = (int)$route->getMatchedParam('interval');
+        $this->interrupted = $interval === 0;
+        $localWorkingDir = realpath(__DIR__ . DIRECTORY_SEPARATOR . 'data');
 
         $versions = array(1, 2);
         $app = new App($console, $remoteHost, $remoteDir, $localWorkingDir, $targetDirectory);
 
-        while (!$this->interrupted) {
+        do {
             try {
                 $this->run($app, $versions);
             } catch (ServiceException $exception) {
-                $console->writeLine('Error: ' . $exception->getMessage());
+                if ($interval !== 0) {
+                    $console->writeLine('Error: ' . $exception->getMessage());
+                }
             }
-            $this->sleep(15);
-        }
+            $this->sleep($interval);
+        } while (!$this->interrupted);
     }
 
     protected function run(App $app, array $versions): void
