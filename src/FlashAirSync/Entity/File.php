@@ -24,14 +24,9 @@ class File
     protected $discoveredAt;
 
     /**
-     * @var int
+     * @var int[]
      */
-    protected $firstDownloadedAt;
-
-    /**
-     * @var int
-     */
-    protected $secondDownloadedAt;
+    protected $downloadedAt = array();
 
     /**
      * @var int
@@ -42,6 +37,11 @@ class File
      * @var int
      */
     protected $storedAt;
+
+    /**
+     * @var int
+     */
+    protected $cleanedUpAt;
 
     public function __construct(string $directory, string $name)
     {
@@ -81,25 +81,25 @@ class File
         return $this;
     }
 
-    public function getFirstDownloadedAt(): ?int
+    public function getDownloadedAt(): array
     {
-        return $this->firstDownloadedAt;
+        return $this->downloadedAt;
     }
 
-    public function setFirstDownloadedAt(int $firstDownloadedAt): File
+    public function setDownloadedAt(array $downloadedAt): File
     {
-        $this->firstDownloadedAt = $firstDownloadedAt;
+        $this->downloadedAt = $downloadedAt;
         return $this;
     }
 
-    public function getSecondDownloadedAt(): ?int
+    public function getDownloadedAtByIndex(int $index): ?int
     {
-        return $this->secondDownloadedAt;
+        return array_key_exists($index, $this->downloadedAt)? $this->downloadedAt[$index] : null;
     }
 
-    public function setSecondDownloadedAt(int $secondDownloadedAt): File
+    public function setDownloadedAtByIndex(int $index, int $downloadedAt): File
     {
-        $this->secondDownloadedAt = $secondDownloadedAt;
+        $this->downloadedAt[$index] = $downloadedAt;
         return $this;
     }
 
@@ -122,6 +122,17 @@ class File
     public function setStoredAt(int $storedAt): File
     {
         $this->storedAt = $storedAt;
+        return $this;
+    }
+
+    public function getCleanedUpAt(): ?int
+    {
+        return $this->cleanedUpAt;
+    }
+
+    public function setCleanedUpAt(int $cleanedUpAt): File
+    {
+        $this->cleanedUpAt = $cleanedUpAt;
         return $this;
     }
 }

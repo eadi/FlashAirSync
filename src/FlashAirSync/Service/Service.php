@@ -4,15 +4,13 @@ namespace FlashAirSync\Service;
 
 class Service
 {
-    protected $sourceHost;
-    protected $targetDir;
-    protected $sourceDir;
+    protected $remoteHost;
+    protected $remotePath;
 
-    public function __construct(string $sourceHost, string $targetDir, string $sourceDir)
+    public function __construct(string $remoteHost, string $remotePath)
     {
-        $this->sourceHost = $sourceHost;
-        $this->targetDir = $targetDir;
-        $this->sourceDir = $sourceDir;
+        $this->remoteHost = $remoteHost;
+        $this->remotePath = $remotePath;
     }
 
     /**
@@ -24,9 +22,9 @@ class Service
     public function ls(): array
     {
         $contents = array();
-        $url = sprintf('http://%s/command.cgi?op=100&DIR=%s', $this->sourceHost, rawurlencode($this->sourceDir));
-        $response = file_get_contents($url);
-        if ($response === null) {
+        $url = sprintf('http://%s/command.cgi?op=100&DIR=%s', $this->remoteHost, rawurlencode($this->remotePath));
+        $response = @file_get_contents($url);
+        if (!$response) {
             throw new Exception('Cannot read directory list.');
         }
 
@@ -34,20 +32,21 @@ class Service
         {
             $entryProperties = str_getcsv($entry);
             if(count($entryProperties) < 3) {
+                //Invalid entry
                 continue;
             }
 
-            if($entryProperties[3] & 16) // bit 5 = Directory
-            {
+            if($entryProperties[3] & 16) {
+                //Directory
                 continue;
             }
 
-            $day     = ($entryProperties[4] & 0b0000000000011111);
-            $month   = ($entryProperties[4] & 0b0000000111100000) >> 5;
             $year    = (($entryProperties[4] & 0b1111111000000000) >> 9) + 1980;
-            $seconds = ($entryProperties[5] & 0b0000000000011111) * 2;
-            $minutes = ($entryProperties[5] & 0b0000011111100000) >> 5;
+            $month   = ($entryProperties[4] & 0b0000000111100000) >> 5;
+            $day     = ($entryProperties[4] & 0b0000000000011111);
             $hours   = ($entryProperties[5] & 0b1111100000000000) >> 11;
+            $minutes = ($entryProperties[5] & 0b0000011111100000) >> 5;
+            $seconds = ($entryProperties[5] & 0b0000000000011111) * 2;
             $isoTime = sprintf('%d-%d-%d %d:%d:%d', $year, $month, $day, $hours, $minutes, $seconds);
             $contents[$entryProperties[1]] = strtotime($isoTime);
         }
@@ -55,18 +54,16 @@ class Service
         return $contents;
     }
 
-    /**
-     * @param string $filename
-     * @param int $createdAt timestamp
-     */
-    public function get(string $filename, int $createdAt): void
+    public function get(string $filename, int $createdAt, string $localPathWorkingDir): void
     {
-        $url = sprintf('http://%s/%s/%s', $this->sourceHost, $this->sourceDir, $filename);
-        $targetPath = $this->targetDir . DIRECTORY_SEPARATOR . $filename;
-        if(copy($url, $targetPath)) {
-            touch($targetPath, $createdAt);
+        $remoteUrl = sprintf('http://%s/%s/%s', $this->remoteHost, $this->remotePath, $filename);
+        $localSaveDir = $localPathWorkingDir . DIRECTORY_SEPARATOR . $this->remotePath;
+        @mkdir($localSaveDir, 0777, true);
+        $localSavePath = $localSaveDir . DIRECTORY_SEPARATOR . $filename;
+        if(copy($remoteUrl, $localSavePath)) {
+            touch($localSavePath, $createdAt);
         } else {
-            throw new Exception(sprintf('Cannot copy file from %s to %s', $url, $targetPath));
+            throw new Exception(sprintf('Cannot copy file from %s to %s', $remoteUrl, $localSavePath));
         }
     }
 }

@@ -5,57 +5,71 @@ use FlashAirSync\Entity\File as FileEntity;
 
 class File
 {
-    public function getByDirAndFilename(string $dir, string $filename): FileEntity
+    const FILE_SUFFIX = '.dat';
+
+    protected $pathWorkingDir;
+    protected $remoteDir;
+
+    protected $entityCache = array();
+
+    public function __construct(string $localWorkingDir, string $remoteDir)
     {
-        $path = $this->getPath($dir, $filename);
-        $entity = new FileEntity($dir, $filename);
+        $this->pathWorkingDir = $localWorkingDir;
+        $this->remoteDir = $remoteDir;
+    }
+
+    public function getByFilename(string $filename): FileEntity
+    {
+        $key = $filename;
+        if (array_key_exists($key, $this->entityCache)) {
+            return $this->entityCache[$key];
+        }
+
+        $path = $this->getLocalPathOfFile($filename);
+
+        $entity = new FileEntity($this->remoteDir, $filename);
         $entity->setDiscoveredAt(time());
 
         if (file_exists($path)) {
-            $fh = fopen($path, 'r');
-            $data = fgetcsv($fh, null, ';');
-            fclose($fh);
-
-            $entity
-                ->setCreatedAt((int)$data[0])
-                ->setDiscoveredAt((int)$data[1])
-                ->setFirstDownloadedAt((int)$data[2])
-                ->setSecondDownloadedAt((int)$data[3])
-                ->setComparedAt((int)$data[4])
-                ->setStoredAt((int)$data[5]);
+            $data = file_get_contents($path);
+            $entity = unserialize($data);
         }
-
-        return $entity;
+        return $this->entityCache[$entity->getName()] = $entity;
     }
 
     public function save(FileEntity $entity): void
     {
-        $path = $this->getPath($entity->getDirectory(), $entity->getName());
-        $data = array(
-            $entity->getCreatedAt(),
-            $entity->getDiscoveredAt(),
-            $entity->getFirstDownloadedAt(),
-            $entity->getSecondDownloadedAt(),
-            $entity->getComparedAt(),
-            $entity->getStoredAt(),
-        );
+        $path = $this->getLocalPathOfFile($entity->getName());
+        $data = serialize($entity);
+        file_put_contents($path, $data);
 
-        $fh = fopen($path, 'w');
-        fputcsv($fh, $data, ';');
-        fclose($fh);
+        $this->entityCache[$entity->getName()] = $entity;
     }
 
-    protected function getPath(string $dir, string $filename): string
+    /**
+     * @return FileEntity[]
+     */
+    public function getAll(): array
     {
-        $dir =
-            __DIR__ .
-            DIRECTORY_SEPARATOR .
-            DIRECTORY_SEPARATOR . $dir;
-        if (!file_exists($dir)) {
+        $localPathPattern = $this->getLocalPathOfFile('*');
+        $result = array();
+
+        foreach (glob($localPathPattern) as $localDataFile) {
+            $filename = preg_replace('/' . self::FILE_SUFFIX . '$/', '', $localDataFile);
+            $result[] = $this->getByFilename(basename($filename));
+        }
+
+        return $result;
+    }
+
+    protected function getLocalPathOfFile(string $filename): string
+    {
+        $localDir = $this->pathWorkingDir . DIRECTORY_SEPARATOR . $this->remoteDir;
+        if (!file_exists($localDir)) {
             // @TODO Sanity check
-            mkdir($dir, 0777, true);
+            mkdir($localDir, 0777, true);
         }
         // @TODO Sanity check
-        return $dir . DIRECTORY_SEPARATOR . $filename . '.csv';
+        return $localDir . DIRECTORY_SEPARATOR . $filename . self::FILE_SUFFIX;
     }
 }
