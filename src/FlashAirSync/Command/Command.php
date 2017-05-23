@@ -3,6 +3,7 @@
 namespace FlashAirSync\Command;
 
 use FlashAirSync\App\App;
+use FlashAirSync\Service\Exception as ServiceException;
 use Zend\Console\Adapter\AdapterInterface;
 use ZF\Console\Route;
 
@@ -23,8 +24,11 @@ class Command
         $app = new App($console, $remoteHost, $remoteDir, $localWorkingDir, $targetDirectory);
 
         while (!$this->interrupted) {
-            $this->run($app, $versions);
-            $console->writeLine('Finished. Nothing more to sync.');
+            try {
+                $this->run($app, $versions);
+            } catch (ServiceException $exception) {
+                $console->writeLine('Error: ' . $exception->getMessage());
+            }
             $this->sleep(15);
         }
     }

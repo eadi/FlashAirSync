@@ -49,29 +49,25 @@ class App
     public function discover(): void
     {
         $discoverWorker = new Discover();
-        $this->adapter->writeLine('Discovered ' . $discoverWorker($this->service, $this->fileRepository) . ' additional files.');
+        $discoverWorker($this->service, $this->fileRepository);
     }
 
     public function download(int $version): void
     {
         $downloadWorker = new Download($this->service);
-        $downloadCounter = 0;
         foreach ($this->fileRepository->getAll() as $localFileEntity) {
             if (!$localFileEntity->getDownloadedAtByIndex($version)) {
                 $downloadWorker($localFileEntity, $this->localWorkingDir . DIRECTORY_SEPARATOR . $version);
                 $localFileEntity->setDownloadedAtByIndex($version, time());
                 $this->fileRepository->save($localFileEntity);
-                $downloadCounter++;
+                $this->adapter->writeLine('Downloaded ' . $localFileEntity->getName() . ' for the ' . $version . '. time.');
             }
         }
-        $this->adapter->writeLine('Downloaded ' . $downloadCounter . ' files for the ' . $version . '. time.');
     }
 
     public function compare(array $versions): void
     {
         $compareWorker = new Compare();
-        $compareCounterSuccess = 0;
-        $compareCounterError = 0;
         foreach ($this->fileRepository->getAll() as $localFileEntity) {
             if (!$localFileEntity->getComparedAt()) {
                 $leftVersion = array_shift($versions);
@@ -81,16 +77,15 @@ class App
                         $this->localWorkingDir . DIRECTORY_SEPARATOR . $rightVersion . DIRECTORY_SEPARATOR . $localFileEntity->getDirectory() . DIRECTORY_SEPARATOR . $localFileEntity->getName()
                     )) {
                         $localFileEntity->setDownloadedAt(array());
-                        $compareCounterError++;
+                        $this->fileRepository->save($localFileEntity);
+                        $this->adapter->writeLine('Error comparing ' . $localFileEntity->getName() . '.');
                         continue 2;
                     }
                 }
                 $localFileEntity->setComparedAt(time());
-                $compareCounterSuccess++;
                 $this->fileRepository->save($localFileEntity);
             }
         }
-        $this->adapter->writeLine('Compared ' . $compareCounterSuccess . ' files successfully and ' . $compareCounterError . ' files with errors.');
     }
 
     public function store(int $fromVersion): void
@@ -103,11 +98,13 @@ class App
                     $this->targetDirectory . DIRECTORY_SEPARATOR . $localFileEntity->getName()
                 )) {
                     $localFileEntity->setStoredAt(time());
-                    $this->adapter->writeLine('Stored file ' . $localFileEntity->getName() . ' successfully.');
-                    $this->fileRepository->save($localFileEntity);
+                    $this->adapter->writeLine('Stored file ' . $localFileEntity->getName() . '.');
                 } else {
-                    $this->adapter->writeLine('Error storing file ' . $localFileEntity->getName() . ' to ' . $this->targetDirectory . ' successfully.');
+                    $localFileEntity->setDownloadedAt(array());
+                    $localFileEntity->setComparedAt(null);
+                    $this->adapter->writeLine('Error storing file ' . $localFileEntity->getName() . ' to ' . $this->targetDirectory . '.');
                 }
+                $this->fileRepository->save($localFileEntity);
             }
         }
     }
