@@ -1,12 +1,21 @@
 {
     "name": "eadi/flashairsync",
+    "type": "project",
+    "license": "LGPL-3.0",
+    "support": {
+        "source": "https://github.com/eadi/flashairsync",
+        "issues": "https://github.com/eadi/flashairsync/issues"
+    },
     "require": {
-        "php": ">=7.1",
+        "php": ">=7.0",
         "zfcampus/zf-console": "1.*"
     },
     "autoload": {
         "psr-4": {
             "FlashAirSync\\": "src/FlashAirSync"
         }
+    },
+    "suggest": {
+        "ext-pcntl": "*"
     }
 }
