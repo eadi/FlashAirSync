@@ -21,7 +21,7 @@ class Service
      */
     public function ls(): array
     {
-        $contents = array();
+        $contents = [];
         $url = sprintf('http://%s/command.cgi?op=100&DIR=%s', $this->remoteHost, rawurlencode($this->remotePath));
         $response = @file_get_contents($url);
         if (!$response) {
@@ -54,7 +54,7 @@ class Service
         return $contents;
     }
 
-    public function get(string $filename, int $createdAt, string $localPathWorkingDir): void
+    public function get(string $filename, int $createdAt, string $localPathWorkingDir)
     {
         $remoteUrl = sprintf('http://%s/%s/%s', $this->remoteHost, $this->remotePath, $filename);
         $localSaveDir = $localPathWorkingDir . DIRECTORY_SEPARATOR . $this->remotePath;

@@ -10,7 +10,7 @@ class File
     protected $pathWorkingDir;
     protected $remoteDir;
 
-    protected $entityCache = array();
+    protected $entityCache = [];
 
     public function __construct(string $localWorkingDir, string $remoteDir)
     {
@@ -37,7 +37,7 @@ class File
         return $this->entityCache[$entity->getName()] = $entity;
     }
 
-    public function save(FileEntity $entity): void
+    public function save(FileEntity $entity)
     {
         $path = $this->getLocalPathOfFile($entity->getName());
         $data = serialize($entity);
@@ -52,7 +52,7 @@ class File
     public function getAll(): array
     {
         $localPathPattern = $this->getLocalPathOfFile('*');
-        $result = array();
+        $result = [];
 
         foreach (glob($localPathPattern) as $localDataFile) {
             $filename = preg_replace('/' . self::FILE_SUFFIX . '$/', '', $localDataFile);

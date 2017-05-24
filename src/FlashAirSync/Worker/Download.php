@@ -13,7 +13,7 @@ class Download
         $this->service = $service;
     }
 
-    public function __invoke(File $file, string $localDir): void
+    public function __invoke(File $file, string $localDir)
     {
         $this->service->get($file->getName(), $file->getCreatedAt(), $localDir);
     }

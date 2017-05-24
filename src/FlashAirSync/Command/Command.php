@@ -22,7 +22,7 @@ class Command
         $this->interrupted = $interval === 0;
         $localWorkingDir = realpath(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'data');
 
-        $versions = array(1, 2);
+        $versions = [1, 2];
         $app = new App($console, $remoteHost, $remoteDir, $localWorkingDir, $targetDirectory);
 
         do {
@@ -37,7 +37,7 @@ class Command
         } while (!$this->interrupted);
     }
 
-    protected function run(App $app, array $versions): void
+    protected function run(App $app, array $versions)
     {
         $app->discover();
         foreach ($versions as $version) {
@@ -57,10 +57,10 @@ class Command
         }
     }
 
-    protected function setUpInterrupts(): void
+    protected function setUpInterrupts()
     {
         if (function_exists('pcntl_signal')) {
-            pcntl_signal(SIGTERM, array($this, 'interrupt'));
+            pcntl_signal(SIGTERM, [$this, 'interrupt']);
         }
     }
 

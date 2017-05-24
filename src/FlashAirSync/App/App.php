@@ -65,7 +65,7 @@ class App
         }
     }
 
-    public function compare(array $versions): void
+    public function compare(array $versions)
     {
         $compareWorker = new Compare();
         foreach ($this->fileRepository->getAll() as $localFileEntity) {
@@ -76,7 +76,7 @@ class App
                         $this->localWorkingDir . DIRECTORY_SEPARATOR . $leftVersion . DIRECTORY_SEPARATOR . $localFileEntity->getDirectory() . DIRECTORY_SEPARATOR . $localFileEntity->getName(),
                         $this->localWorkingDir . DIRECTORY_SEPARATOR . $rightVersion . DIRECTORY_SEPARATOR . $localFileEntity->getDirectory() . DIRECTORY_SEPARATOR . $localFileEntity->getName()
                     )) {
-                        $localFileEntity->setDownloadedAt(array());
+                        $localFileEntity->setDownloadedAt([]);
                         $this->fileRepository->save($localFileEntity);
                         $this->adapter->writeLine('Error comparing ' . $localFileEntity->getName() . '.');
                         continue 2;
@@ -88,7 +88,7 @@ class App
         }
     }
 
-    public function store(int $fromVersion): void
+    public function store(int $fromVersion)
     {
         $storeWorker = new Store();
         foreach ($this->fileRepository->getAll() as $localFileEntity) {
@@ -100,7 +100,7 @@ class App
                     $localFileEntity->setStoredAt(time());
                     $this->adapter->writeLine('Stored file ' . $localFileEntity->getName() . '.');
                 } else {
-                    $localFileEntity->setDownloadedAt(array());
+                    $localFileEntity->setDownloadedAt([]);
                     $localFileEntity->setComparedAt(null);
                     $this->adapter->writeLine('Error storing file ' . $localFileEntity->getName() . ' to ' . $this->targetDirectory . '.');
                 }
@@ -109,7 +109,7 @@ class App
         }
     }
 
-    public function cleanup(array $versions): void
+    public function cleanup(array $versions)
     {
         $cleanupWorker = new Cleanup();
         foreach ($this->fileRepository->getAll() as $localFileEntity) {

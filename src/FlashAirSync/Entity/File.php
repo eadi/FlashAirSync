@@ -26,7 +26,7 @@ class File
     /**
      * @var int[]
      */
-    protected $downloadedAt = array();
+    protected $downloadedAt = [];
 
     /**
      * @var int
@@ -59,7 +59,10 @@ class File
         return $this->directory;
     }
 
-    public function getCreatedAt(): ?int
+    /**
+     * @return int|null
+     */
+    public function getCreatedAt()
     {
         return $this->createdAt;
     }
@@ -70,7 +73,10 @@ class File
         return $this;
     }
 
-    public function getDiscoveredAt(): ?int
+    /**
+     * @return int|null
+     */
+    public function getDiscoveredAt()
     {
         return $this->discoveredAt;
     }
@@ -92,7 +98,11 @@ class File
         return $this;
     }
 
-    public function getDownloadedAtByIndex(int $index): ?int
+    /**
+     * @param int $index
+     * @return int|null
+     */
+    public function getDownloadedAtByIndex(int $index)
     {
         return array_key_exists($index, $this->downloadedAt)? $this->downloadedAt[$index] : null;
     }
@@ -103,7 +113,10 @@ class File
         return $this;
     }
 
-    public function getComparedAt(): ?int
+    /**
+     * @return int|null
+     */
+    public function getComparedAt()
     {
         return $this->comparedAt;
     }
@@ -114,7 +127,10 @@ class File
         return $this;
     }
 
-    public function getStoredAt(): ?int
+    /**
+     * @return int|null
+     */
+    public function getStoredAt()
     {
         return $this->storedAt;
     }
@@ -125,7 +141,10 @@ class File
         return $this;
     }
 
-    public function getCleanedUpAt(): ?int
+    /**
+     * @return int|null
+     */
+    public function getCleanedUpAt()
     {
         return $this->cleanedUpAt;
     }
