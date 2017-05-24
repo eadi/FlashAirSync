@@ -3,14 +3,12 @@
 use Zend\Console\Console;
 use ZF\Console\Application;
 
-chdir(dirname(__DIR__));
-
-require_once 'vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 $application = new Application(
     "FlashAirSync",
     "0.1",
-    include 'config/routes.php',
+    include __DIR__ . '/../config/routes.php',
     Console::getInstance()
 );
 
