@@ -29,7 +29,7 @@ class Command
             try {
                 $this->run($app, $versions);
             } catch (ServiceException $exception) {
-                if ($interval !== 0) {
+                if ($interval === 0) {
                     $console->writeLine('Error: ' . $exception->getMessage());
                 }
             }
