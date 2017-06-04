@@ -46,13 +46,13 @@ class App
         $this->fileRepository = new FileRepository($this->localRepositoryDir, $this->remoteDir);
     }
 
-    public function discover(): void
+    public function discover()
     {
         $discoverWorker = new Discover();
         $discoverWorker($this->service, $this->fileRepository);
     }
 
-    public function download(int $version): void
+    public function download(int $version)
     {
         $downloadWorker = new Download($this->service);
         foreach ($this->fileRepository->getAll() as $localFileEntity) {
